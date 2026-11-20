@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Local Job & Skill Matching Portal
 
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
@@ -333,3 +334,6 @@ pytest tests/test_all_20_cases.py -v
 
 ## License
 MIT License. Created for the **Local Job & Skill Matching Portal** project.
+=======
+# local-job-skill-matching-portal
+>>>>>>> f19d4f00a297e3535cc561c72125e59812047c08
