@@ -1,61 +1,192 @@
+
 import os
 import ssl
+from pathlib import Path
+from datetime import timedelta
+
 from dotenv import load_dotenv
 
-load_dotenv()
+
+# ============================================================
+# 1. LOAD ENVIRONMENT VARIABLES
+# ============================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+ENV_FILE = BASE_DIR / ".env"
+
+load_dotenv(dotenv_path=ENV_FILE)
+
+
+# ============================================================
+# 2. ENVIRONMENT HELPERS
+# ============================================================
+
+def env_bool(name, default=False):
+    """Read environment variables as boolean values."""
+    value = os.environ.get(name)
+
+    if value is None:
+        return default
+
+    return value.strip().lower() in ("true", "1", "yes", "on")
+
+
+IS_VERCEL = os.environ.get("VERCEL") == "1"
+
+ENV = os.environ.get(
+    "FLASK_ENV",
+    "production" if IS_VERCEL else "development"
+)
+
+IS_PRODUCTION = ENV.lower() == "production" or IS_VERCEL
+
+
+# ============================================================
+# 3. FLASK CONFIGURATION
+# ============================================================
 
 class Config:
-    # Environment detection
-    IS_VERCEL = bool(os.environ.get('VERCEL') == '1')
-    ENV = os.environ.get('FLASK_ENV', 'production' if IS_VERCEL else 'development')
-    IS_PRODUCTION = (ENV == 'production') or IS_VERCEL
 
-    # Secret key handling
-    dev_default_secret = 'local-job-skill-portal-dev-secret-key-9928374'
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    DEBUG = not IS_PRODUCTION
+
+    # --------------------------------------------------------
+    # SECRET KEY
+    # --------------------------------------------------------
+
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+
     if not SECRET_KEY:
+
         if IS_PRODUCTION:
-            # Generate a secure fallback warning in production if not explicitly configured
-            SECRET_KEY = os.environ.get('SECRET_KEY', dev_default_secret)
-        else:
-            SECRET_KEY = dev_default_secret
-    
-    # Database URL handling
-    # Convert 'mysql://' to 'mysql+pymysql://' for SQLAlchemy compatibility
-    raw_db_url = os.environ.get('DATABASE_URL')
+            raise RuntimeError(
+                "SECRET_KEY must be configured in production."
+            )
+
+        SECRET_KEY = "local-job-skill-portal-dev-secret-key-9928374"
+
+    # --------------------------------------------------------
+    # DATABASE CONFIGURATION
+    # --------------------------------------------------------
+
+    raw_db_url = os.environ.get("DATABASE_URL")
+
     if raw_db_url:
-        if raw_db_url.startswith('mysql://'):
-            raw_db_url = raw_db_url.replace('mysql://', 'mysql+pymysql://', 1)
+
+        # Convert mysql:// to mysql+pymysql://
+        if raw_db_url.startswith("mysql://"):
+            raw_db_url = raw_db_url.replace(
+                "mysql://",
+                "mysql+pymysql://",
+                1
+            )
+
         SQLALCHEMY_DATABASE_URI = raw_db_url
+
     else:
-        # Fallback for local development if DATABASE_URL is not set
-        base_dir = os.path.abspath(os.path.dirname(__file__))
-        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(base_dir, 'instance', 'local_portal.db')}"
-        
+
+        # Never use temporary SQLite storage in production.
+        if IS_PRODUCTION:
+            raise RuntimeError(
+                "DATABASE_URL must be configured in production."
+            )
+
+        # Local SQLite fallback.
+        instance_dir = BASE_DIR / "instance"
+        instance_dir.mkdir(parents=True, exist_ok=True)
+
+        SQLALCHEMY_DATABASE_URI = (
+            f"sqlite:///{instance_dir / 'local_portal.db'}"
+        )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Engine options & Serverless connection pooling
+    SQLALCHEMY_ECHO = env_bool(
+        "SQLALCHEMY_ECHO",
+        False
+    )
+
+    # --------------------------------------------------------
+    # MYSQL / TIDB SSL CONFIGURATION
+    # --------------------------------------------------------
+
     connect_args = {}
-    if 'mysql' in SQLALCHEMY_DATABASE_URI:
-        # Handle Managed Cloud MySQL SSL requirement (TiDB, Aiven, AWS RDS, PlanetScale)
-        ssl_ca = os.environ.get('MYSQL_SSL_CA')
-        if ssl_ca and os.path.exists(ssl_ca):
-            connect_args['ssl'] = {'ca': ssl_ca}
-        elif os.environ.get('MYSQL_SSL_REQUIRE', '').lower() in ('true', '1', 'required'):
-            ssl_ctx = ssl.create_default_context()
-            connect_args['ssl'] = ssl_ctx
-        elif 'ssl_ca=' in SQLALCHEMY_DATABASE_URI or 'ssl=' in SQLALCHEMY_DATABASE_URI:
-            pass  # Already passed via query parameter
+
+    is_mysql = SQLALCHEMY_DATABASE_URI.startswith(
+        ("mysql://", "mysql+pymysql://")
+    )
+
+    if is_mysql:
+
+        ssl_required = env_bool(
+            "MYSQL_SSL_REQUIRE",
+            IS_PRODUCTION
+        )
+
+        ssl_ca = os.environ.get("MYSQL_SSL_CA")
+
+        if ssl_ca:
+
+            # Resolve relative certificate paths.
+            ca_path = Path(ssl_ca)
+
+            if not ca_path.is_absolute():
+                ca_path = BASE_DIR / ca_path
+
+            if not ca_path.is_file():
+                raise RuntimeError(
+                    f"MySQL SSL certificate not found: {ca_path}"
+                )
+
+            # Verify certificate and server hostname.
+            ssl_context = ssl.create_default_context(
+                purpose=ssl.Purpose.SERVER_AUTH,
+                cafile=str(ca_path)
+            )
+
+            connect_args["ssl"] = ssl_context
+
+        elif ssl_required:
+
+            # Use system trusted certificate authorities.
+            ssl_context = ssl.create_default_context(
+                purpose=ssl.Purpose.SERVER_AUTH
+            )
+
+            connect_args["ssl"] = ssl_context
+
+    # --------------------------------------------------------
+    # SQLALCHEMY CONNECTION POOLING
+    # --------------------------------------------------------
 
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_recycle': 280,
-        'pool_pre_ping': True,
-        'connect_args': connect_args
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+        "connect_args": connect_args
     }
-    
-    # Session & Cookie security
+
+    # --------------------------------------------------------
+    # SESSION AND COOKIE SECURITY
+    # --------------------------------------------------------
+
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    # Use Secure cookies in production (HTTPS on Vercel)
-    SESSION_COOKIE_SECURE = IS_PRODUCTION or (os.environ.get('SESSION_COOKIE_SECURE', 'false').lower() in ('true', '1'))
-    PERMANENT_SESSION_LIFETIME = 86400  # 24 hours
+
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+    SESSION_COOKIE_SECURE = (
+        IS_PRODUCTION
+        or env_bool("SESSION_COOKIE_SECURE", False)
+    )
+
+    PERMANENT_SESSION_LIFETIME = timedelta(
+        seconds=86400
+    )
+
+    # --------------------------------------------------------
+    # APPLICATION SECURITY
+    # --------------------------------------------------------
+
+    WTF_CSRF_ENABLED = True
+
+    WTF_CSRF_TIME_LIMIT = 3600
+
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
