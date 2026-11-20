@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{% if job %}Edit Job - {{ job.title }}{% else %}Post a New Job{% endif %} - Local Job & Skill Matching Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+                <div class="bg-primary text-white p-4">
+                    <h3 class="fw-bold mb-1">
+                        <i class="bi bi-briefcase me-2"></i>
+                        {% if job %}Edit Job Posting{% else %}Publish a New Daily Wage Job Opening{% endif %}
+                    </h3>
+                    <p class="mb-0 opacity-75 small">
+                        Find qualified, local workers in your area with zero intermediary commission
+                    </p>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <form action="{% if job %}{{ url_for('jobs.edit_job', job_id=job.id) }}{% else %}{{ url_for('jobs.post_job') }}{% endif %}" method="POST">
+                        <!-- Job Title & Category -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold small">Job Title <span class="text-danger">*</span></label>
+                                <input type="text" name="title" class="form-control form-control-custom" value="{{ job.title if job else '' }}" placeholder="e.g. Urgent Wall Painting & Boundary Plastering" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Job Category <span class="text-danger">*</span></label>
+                                <select name="category" class="form-select form-select-custom" required>
+                                    {% set categories = ['Construction Worker', 'Electrician', 'Painter', 'Plumber', 'Carpenter', 'Delivery Worker', 'Helper', 'Mason'] %}
+                                    {% for cat in categories %}
+                                        <option value="{{ cat }}" {% if job and job.category == cat %}selected{% endif %}>{{ cat }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Location & Required Skills -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Work Location / Site Town <span class="text-danger">*</span></label>
+                                <input type="text" name="location" class="form-control form-control-custom" value="{{ job.location if job else current_user.location }}" placeholder="e.g. Bantwal, Mangalore" required>
+                                <div class="form-text small">Used for proximity matching with local workers.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Required Skills (Comma-separated) <span class="text-danger">*</span></label>
+                                <input type="text" name="required_skills" class="form-control form-control-custom" value="{{ job.required_skills if job else '' }}" placeholder="e.g. Painting, Helper, Masonry" required>
+                                <div class="form-text small">Matching algorithm aligns these with worker skills.</div>
+                            </div>
+                        </div>
+
+                        <!-- Wage, Wage Type & Workers Needed -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Daily Wage / Salary (₹) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">₹</span>
+                                    <input type="number" step="50" min="200" name="wage" class="form-control form-control-custom" value="{{ '%.0f'|format(job.wage) if job else '700' }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Wage Rate Type</label>
+                                <select name="wage_type" class="form-select form-select-custom">
+                                    <option value="Daily" {% if job and job.wage_type == 'Daily' %}selected{% endif %}>Daily Rate</option>
+                                    <option value="Per Job" {% if job and job.wage_type == 'Per Job' %}selected{% endif %}>Per Job Contract</option>
+                                    <option value="Hourly" {% if job and job.wage_type == 'Hourly' %}selected{% endif %}>Hourly Rate</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">Number of Workers Needed</label>
+                                <input type="number" min="1" max="50" name="workers_needed" class="form-control form-control-custom" value="{{ job.workers_needed if job else '1' }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Duration & Working Hours -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Estimated Work Duration</label>
+                                <input type="text" name="duration" class="form-control form-control-custom" value="{{ job.duration if job else '3 Days' }}" placeholder="e.g. 2 Days, 1 Week, Ongoing">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Daily Working Hours</label>
+                                <input type="text" name="working_hours" class="form-control form-control-custom" value="{{ job.working_hours if job else '8:30 AM - 5:30 PM' }}" placeholder="e.g. 8:30 AM - 5:30 PM">
+                            </div>
+                        </div>
+
+                        <!-- Direct Contact Information -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Direct Contact Phone Number</label>
+                                <input type="tel" name="contact_phone" class="form-control form-control-custom" value="{{ job.contact_phone if job else current_user.phone }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Contact Email Address</label>
+                                <input type="email" name="contact_email" class="form-control form-control-custom" value="{{ job.contact_email if job else current_user.email }}">
+                            </div>
+                        </div>
+
+                        <!-- Detailed Description -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Job Description & Tasks <span class="text-danger">*</span></label>
+                            <textarea name="description" rows="5" class="form-control form-control-custom" placeholder="Describe the work required, materials supplied, exact site location landmarks, and expectations..." required>{{ job.description if job else '' }}</textarea>
+                        </div>
+
+                        {% if job %}
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small">Job Status</label>
+                                <select name="status" class="form-select form-select-custom">
+                                    <option value="active" {% if job.status == 'active' %}selected{% endif %}>Active (Accepting Applications)</option>
+                                    <option value="closed" {% if job.status == 'closed' %}selected{% endif %}>Closed (Completed / Filled)</option>
+                                </select>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="{{ url_for('employer.dashboard') }}" class="btn btn-light-custom">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {% if job %}Save Job Changes{% else %}Publish Job Opening{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Applications - Local Job & Skill Matching Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h3 class="fw-bold mb-1">
+                    <i class="bi bi-file-earmark-check text-primary me-2"></i>
+                    {% if is_worker %}My Job Applications{% else %}Received Job Applications{% endif %}
+                </h3>
+                <p class="text-muted small mb-0">
+                    {% if is_worker %}
+                        Review the real-time status of your job submissions and contact accepted employers directly
+                    {% else %}
+                        Review interested local workers, inspect their skills, and accept or decline candidates
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div>
+                {% if is_worker %}
+                    <a href="{{ url_for('jobs.find_jobs') }}" class="btn btn-primary-custom btn-sm">
+                        <i class="bi bi-search me-1"></i> Browse More Jobs
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('employer.dashboard') }}" class="btn btn-outline-custom btn-sm">
+                        <i class="bi bi-speedometer2 me-1"></i> Employer Dashboard
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if applications %}
+        <div class="d-flex flex-column gap-3">
+            {% for app in applications %}
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <h5 class="fw-bold mb-0">
+                                    <a href="{{ url_for('jobs.job_details', job_id=app.job.id) }}" class="text-dark text-decoration-none">
+                                        {{ app.job.title }}
+                                    </a>
+                                </h5>
+                                {% if app.status == 'Accepted' %}
+                                    <span class="badge-status-accepted"><i class="bi bi-check-circle-fill me-1"></i>Accepted</span>
+                                {% elif app.status == 'Rejected' %}
+                                    <span class="badge-status-rejected"><i class="bi bi-x-circle-fill me-1"></i>Declined</span>
+                                {% else %}
+                                    <span class="badge-status-pending"><i class="bi bi-hourglass-split me-1"></i>Pending Review</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="text-muted small mb-2">
+                                {% if is_worker %}
+                                    <span class="me-3"><i class="bi bi-building me-1 text-primary"></i>Employer: {{ app.job.employer_profile.company_name }}</span>
+                                    <span class="me-3"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ app.job.location }}</span>
+                                {% else %}
+                                    <span class="me-3"><i class="bi bi-person-fill me-1 text-primary"></i>Applicant: <strong>{{ app.worker_profile.user.full_name }}</strong></span>
+                                    <span class="me-3"><i class="bi bi-geo-alt me-1 text-danger"></i>Location: {{ app.worker_profile.user.location }}</span>
+                                    <span class="me-3"><i class="bi bi-award me-1 text-info"></i>{{ app.worker_profile.experience_years }} Yrs Exp</span>
+                                    <span class="me-3"><i class="bi bi-cash me-1 text-success"></i>Expected: ₹{{ "%.0f"|format(app.worker_profile.expected_wage) }}/day</span>
+                                {% endif %}
+                                <span><i class="bi bi-calendar3 me-1"></i>Applied: {{ app.applied_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                            </div>
+
+                            {% if not is_worker %}
+                                <div class="mb-2">
+                                    <span class="text-muted small fw-semibold">Worker Skills:</span>
+                                    {% for s in app.worker_profile.skills_list %}
+                                        <span class="skill-chip">{{ s }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {% if app.cover_note %}
+                                <div class="p-2 bg-light rounded-3 small text-secondary">
+                                    <strong>Applicant Note:</strong> "{{ app.cover_note }}"
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Actions / Direct Contact -->
+                        <div class="text-lg-end" style="min-width: 220px;">
+                            {% if is_worker %}
+                                {% if app.status == 'Accepted' %}
+                                    <div class="mb-2">
+                                        <a href="tel:{{ app.job.contact_phone or app.job.employer_profile.contact_phone }}" class="btn btn-success btn-sm w-100">
+                                            <i class="bi bi-telephone-fill me-1"></i> Call Employer ({{ app.job.contact_phone or app.job.employer_profile.contact_phone }})
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <a href="{{ url_for('jobs.job_details', job_id=app.job.id) }}" class="btn btn-outline-custom btn-sm w-100">
+                                    View Job Details
+                                </a>
+                            {% else %}
+                                <!-- Employer View -->
+                                <div class="mb-2">
+                                    <a href="tel:{{ app.worker_profile.user.phone }}" class="btn btn-outline-success btn-sm w-100">
+                                        <i class="bi bi-telephone-fill me-1"></i> Call Worker ({{ app.worker_profile.user.phone }})
+                                    </a>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    {% if app.status != 'Accepted' %}
+                                        <form action="{{ url_for('applications.update_status', app_id=app.id) }}" method="POST" class="flex-fill">
+                                            <input type="hidden" name="status" value="Accepted">
+                                            <button type="submit" class="btn btn-success btn-sm w-100">
+                                                Accept
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    {% if app.status != 'Rejected' %}
+                                        <form action="{{ url_for('applications.update_status', app_id=app.id) }}" method="POST" class="flex-fill">
+                                            <input type="hidden" name="status" value="Rejected">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-5 text-center">
+            <i class="bi bi-inbox text-muted fs-1 mb-3"></i>
+            <h5 class="fw-bold">No applications found</h5>
+            <p class="text-muted small">
+                {% if is_worker %}
+                    You have not applied for any jobs yet. Browse available jobs in your locality to start applying!
+                {% else %}
+                    You have not received any applications for your posted jobs yet.
+                {% endif %}
+            </p>
+            <div>
+                {% if is_worker %}
+                    <a href="{{ url_for('jobs.find_jobs') }}" class="btn btn-primary-custom btn-sm">Find Jobs</a>
+                {% else %}
+                    <a href="{{ url_for('jobs.post_job') }}" class="btn btn-primary-custom btn-sm">Post a Job</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

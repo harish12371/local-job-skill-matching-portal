@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Local Job & Skill Matching Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+                <div class="bg-primary text-white p-4 text-center">
+                    <h3 class="fw-bold mb-1">Create Your Account</h3>
+                    <p class="mb-0 opacity-75 small">Join our commission-free local employment network</p>
+                </div>
+
+                <div class="p-4 p-md-5">
+                    <!-- Role Switcher -->
+                    <div class="btn-group w-100 mb-4 shadow-sm" role="group">
+                        <input type="radio" class="btn-check" name="role_selector" id="role_worker" value="worker" autocomplete="off" {% if role == 'worker' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary py-2 fw-semibold" for="role_worker">
+                            <i class="bi bi-tools me-2"></i> Register as Worker
+                        </label>
+
+                        <input type="radio" class="btn-check" name="role_selector" id="role_employer" value="employer" autocomplete="off" {% if role == 'employer' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary py-2 fw-semibold" for="role_employer">
+                            <i class="bi bi-building me-2"></i> Register as Employer
+                        </label>
+                    </div>
+
+                    <form action="{{ url_for('auth.register') }}" method="POST" id="registration-form">
+                        <input type="hidden" name="role" id="form-role-input" value="{{ role }}">
+
+                        <!-- Common Personal Details -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" name="full_name" class="form-control form-control-custom" placeholder="e.g. Ramesh Poojary" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control form-control-custom" placeholder="name@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Mobile Phone Number <span class="text-danger">*</span></label>
+                                <input type="tel" name="phone" class="form-control form-control-custom" placeholder="+91 98765 43210" required>
+                                <div class="form-text small">Used by employers/workers to call directly.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">City / Town Location <span class="text-danger">*</span></label>
+                                <input type="text" name="location" class="form-control form-control-custom" placeholder="e.g. Bantwal or Mangalore" required>
+                                <div class="form-text small">Essential for local proximity job matching.</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Street Address / Landmark</label>
+                            <input type="text" name="address" class="form-control form-control-custom" placeholder="e.g. Melkar, B.C. Road, Bantwal">
+                        </div>
+
+                        <!-- Worker Specific Fields -->
+                        <div id="worker-specific-fields" class="{% if role != 'worker' %}d-none{% endif %} border-top pt-3 mt-3">
+                            <h5 class="fw-bold text-primary mb-3"><i class="bi bi-tools me-2"></i>Worker Profile Information</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Your Skills & Vocational Trades <span class="text-danger">*</span></label>
+                                <input type="text" name="skills" class="form-control form-control-custom" placeholder="e.g. Painting, Masonry, Helper">
+                                <div class="form-text small">Separate skills with commas. Examples: Painting, Electrician, Plumber, Carpenter, Delivery Worker, Helper, Mason.</div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Work Experience (Years)</label>
+                                    <input type="number" step="0.5" min="0" max="50" name="experience_years" class="form-control form-control-custom" value="1.0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Expected Daily Wage (₹)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">₹</span>
+                                        <input type="number" step="50" min="200" max="10000" name="expected_wage" class="form-control form-control-custom" value="650">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employer Specific Fields -->
+                        <div id="employer-specific-fields" class="{% if role != 'employer' %}d-none{% endif %} border-top pt-3 mt-3">
+                            <h5 class="fw-bold text-primary mb-3"><i class="bi bi-building me-2"></i>Employer / Business Information</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Company or Business Name <span class="text-danger">*</span></label>
+                                <input type="text" name="company_name" class="form-control form-control-custom" placeholder="e.g. Coastal Infra & Builders">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Business Description</label>
+                                <textarea name="business_description" rows="2" class="form-control form-control-custom" placeholder="Brief description of your projects or establishment..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Password Fields -->
+                        <div class="row g-3 mb-4 border-top pt-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
+                                <input type="password" name="password" class="form-control form-control-custom" placeholder="Minimum 6 characters" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+                                <input type="password" name="confirm_password" class="form-control form-control-custom" placeholder="Re-enter password" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary-custom py-3 fs-6">
+                                <i class="bi bi-check-circle me-2"></i> Complete Registration & Log In
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3 pt-3 border-top">
+                        <span class="text-muted small">Already have an account?</span>
+                        <a href="{{ url_for('auth.login', role=role) }}" class="fw-bold text-primary text-decoration-none ms-1">
+                            Sign In Here
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
