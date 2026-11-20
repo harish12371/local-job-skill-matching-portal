@@ -1,5 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from models import db
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class EmployerProfile(db.Model):
     __tablename__ = 'employer_profiles'
@@ -12,8 +15,8 @@ class EmployerProfile(db.Model):
     business_address = db.Column(db.String(255), nullable=True)
     work_location = db.Column(db.String(100), nullable=True)
     contact_phone = db.Column(db.String(20), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     jobs = db.relationship('Job', backref='employer_profile', lazy='dynamic', cascade='all, delete-orphan')

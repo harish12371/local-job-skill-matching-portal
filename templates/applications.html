@@ -107,6 +107,7 @@
                                 <div class="d-flex gap-2">
                                     {% if app.status != 'Accepted' %}
                                         <form action="{{ url_for('applications.update_status', app_id=app.id) }}" method="POST" class="flex-fill">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <input type="hidden" name="status" value="Accepted">
                                             <button type="submit" class="btn btn-success btn-sm w-100">
                                                 Accept
@@ -115,6 +116,7 @@
                                     {% endif %}
                                     {% if app.status != 'Rejected' %}
                                         <form action="{{ url_for('applications.update_status', app_id=app.id) }}" method="POST" class="flex-fill">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                             <input type="hidden" name="status" value="Rejected">
                                             <button type="submit" class="btn btn-outline-danger btn-sm w-100">
                                                 Reject

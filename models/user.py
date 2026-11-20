@@ -1,7 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -14,8 +17,8 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(100), nullable=False)
     address = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     worker_profile = db.relationship('WorkerProfile', backref='user', uselist=False, cascade='all, delete-orphan')

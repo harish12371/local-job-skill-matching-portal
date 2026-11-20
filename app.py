@@ -1,7 +1,10 @@
 import os
 from flask import Flask, render_template
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 from models import db, login_manager
+
+csrf = CSRFProtect()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -10,6 +13,7 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     # Register Blueprints
     from routes.main import main_bp
@@ -19,6 +23,9 @@ def create_app(config_class=Config):
     from routes.jobs import jobs_bp
     from routes.applications import applications_bp
     from routes.api import api_bp
+
+    # Exempt REST API blueprint from CSRF for API clients
+    csrf.exempt(api_bp)
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -31,9 +38,9 @@ def create_app(config_class=Config):
     # Context processors
     @app.context_processor
     def inject_globals():
-        from datetime import datetime
+        from datetime import datetime, timezone
         return {
-            'current_year': datetime.utcnow().year,
+            'current_year': datetime.now(timezone.utc).year,
             'app_name': 'Local Job & Skill Matching Portal'
         }
 

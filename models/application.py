@@ -1,5 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from models import db
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class Application(db.Model):
     __tablename__ = 'applications'
@@ -9,8 +12,8 @@ class Application(db.Model):
     worker_id = db.Column(db.Integer, db.ForeignKey('worker_profiles.id', ondelete='CASCADE'), nullable=False, index=True)
     status = db.Column(db.String(20), default='Pending', nullable=False, index=True)  # 'Pending', 'Accepted', 'Rejected'
     cover_note = db.Column(db.Text, nullable=True)
-    applied_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    applied_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     # Ensure a worker cannot apply twice to the same job
     __table_args__ = (

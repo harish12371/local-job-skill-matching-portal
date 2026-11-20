@@ -17,6 +17,7 @@
 
                 <div class="p-4 p-md-5">
                     <form action="{{ url_for('auth.login', role=role, next=request.args.get('next')) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="mb-3">
                             <label class="form-label fw-semibold small">Email Address</label>
                             <div class="input-group">
