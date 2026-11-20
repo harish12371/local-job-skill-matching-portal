@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Local Job & Skill Matching Portal{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="bg-white border-bottom py-5">
+    <div class="container text-center">
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 fw-semibold mb-2">Project Overview & Objectives</span>
+        <h1 class="fw-bold mb-3">About The Local Job & Skill Matching Portal</h1>
+        <p class="text-muted lead mx-auto" style="max-width: 720px;">
+            A dedicated technology platform designed to bridge the gap between daily wage workers and local employers through transparent, skill-based, and location-aware matching.
+        </p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Problems Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="brand-icon-box bg-danger bg-gradient" style="width: 48px; height: 48px; font-size: 1.4rem;">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-danger">The Daily Wage Worker Dilemma</h4>
+                </div>
+                <p class="text-muted">
+                    Millions of informal and daily wage workers face daily uncertainty and severe structural challenges in the unorganized labor market:
+                </p>
+                <ul class="list-unstyled text-secondary small d-flex flex-column gap-3 mb-0">
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-danger fs-5 mt-n1"></i>
+                        <span><strong>Gathering at Labor Chowks:</strong> Workers must assemble at street corners early each morning regardless of rain or scorching heat, often returning home without work.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-danger fs-5 mt-n1"></i>
+                        <span><strong>Middlemen & Wage Exploitation:</strong> Unauthorized labor contractors and agents take heavy commission cuts from workers' daily wages.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-danger fs-5 mt-n1"></i>
+                        <span><strong>Commute & Distance Burdens:</strong> Workers often travel long distances blindly without knowing whether suitable work is actually available.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-danger fs-5 mt-n1"></i>
+                        <span><strong>Lack of Verified Track Record:</strong> No digital portfolio to showcase skills in painting, carpentry, masonry, or electrical work.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="brand-icon-box bg-warning bg-gradient" style="width: 48px; height: 48px; font-size: 1.4rem;">
+                        <i class="bi bi-building-exclamation"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-warning text-dark">Challenges Faced by Employers</h4>
+                </div>
+                <p class="text-muted">
+                    Local businesses, agricultural estate managers, and homeowners experience significant friction when hiring workers:
+                </p>
+                <ul class="list-unstyled text-secondary small d-flex flex-column gap-3 mb-0">
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-warning fs-5 mt-n1"></i>
+                        <span><strong>Shortage of On-Demand Labor:</strong> Difficulty finding skilled technicians (plumbers, electricians, masons) for immediate or short-term work.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-warning fs-5 mt-n1"></i>
+                        <span><strong>Unreliable Referrals:</strong> Relying on word-of-mouth leads to unpredictable skills, tardiness, and delays in project timelines.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-warning fs-5 mt-n1"></i>
+                        <span><strong>Inflated Agency Margins:</strong> Commercial contractors markup wage costs heavily without guaranteeing quality.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-x-circle text-warning fs-5 mt-n1"></i>
+                        <span><strong>Inefficient Coordination:</strong> No unified dashboard to track job postings, review applicants, and confirm availability.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Solution & Core Concept -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-primary text-white mb-5 position-relative overflow-hidden">
+        <div class="row align-items-center position-relative" style="z-index: 2;">
+            <div class="col-lg-8">
+                <span class="badge bg-white text-primary px-3 py-2 fw-semibold mb-3">The Architectural Formula</span>
+                <h2 class="fw-bold mb-3 text-white">SKILL + LOCATION = BETTER JOB MATCHING</h2>
+                <p class="lead opacity-90 mb-0">
+                    Our platform replaces random searching with intelligent, rule-based algorithmic matching. By evaluating the trade skills of the worker against job requirements and calculating geographic proximity, we deliver instant, high-compatibility matches for both parties.
+                </p>
+            </div>
+            <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                <div class="bg-white p-4 rounded-4 shadow-sm text-dark">
+                    <div class="fw-bold fs-4 text-primary mb-1">100% Direct</div>
+                    <div class="small text-muted mb-3">No Middleman Commissions</div>
+                    <a href="{{ url_for('jobs.find_jobs') }}" class="btn btn-primary-custom w-100">Explore Portal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Objectives -->
+    <div class="mb-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Key Project Objectives</h2>
+            <p class="text-muted">Built as a real-world software engineering solution for local employment dignity</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 border bg-white h-100 shadow-sm">
+                    <div class="brand-icon-box mb-3" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h5 class="fw-bold">Dignified Digital Identity</h5>
+                    <p class="text-muted small mb-0">
+                        Provide every daily wage worker with a verified digital profile showcasing their core vocational trade skills, years of experience, and expected daily wage.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 border bg-white h-100 shadow-sm">
+                    <div class="brand-icon-box mb-3" style="width: 44px; height: 44px; font-size: 1.25rem; background: linear-gradient(135deg, #059669, #10b981);">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <h5 class="fw-bold">Hyper-Local Connectivity</h5>
+                    <p class="text-muted small mb-0">
+                        Prioritize job postings situated in the same taluk, town, or neighborhood (e.g. Bantwal, Mangalore), minimizing travel times and maximizing worker earnings.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 border bg-white h-100 shadow-sm">
+                    <div class="brand-icon-box mb-3" style="width: 44px; height: 44px; font-size: 1.25rem; background: linear-gradient(135deg, #d97706, #f59e0b);">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h5 class="fw-bold">Streamlined Hiring Pipeline</h5>
+                    <p class="text-muted small mb-0">
+                        Equip employers with an intuitive dashboard to post jobs, monitor applications in real-time, accept or decline candidates, and directly initiate telephone contact.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

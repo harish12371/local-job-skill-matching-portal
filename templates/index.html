@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Local Job & Skill Matching Portal - Find Local Jobs. Connect Directly.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7 text-center text-lg-start">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill bg-white border shadow-sm">
+                    <span class="badge bg-primary">NEW</span>
+                    <span class="small fw-semibold text-secondary">Skill + Location = Better Job Matching</span>
+                </div>
+                <h1 class="hero-title mb-3">
+                    Find Local Jobs. <br>
+                    <span class="text-primary">Connect Directly.</span> <br>
+                    Work Better.
+                </h1>
+                <p class="hero-subtitle mb-4">
+                    Connecting daily wage workers with nearby job opportunities and helping employers find reliable, skilled workers quickly without commissions.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    <a href="{{ url_for('jobs.find_jobs') }}" class="btn btn-primary-custom px-4 py-3">
+                        <i class="bi bi-search"></i> Find Jobs Near You
+                    </a>
+                    {% if current_user.is_authenticated and current_user.is_employer() %}
+                        <a href="{{ url_for('jobs.post_job') }}" class="btn btn-outline-custom px-4 py-3">
+                            <i class="bi bi-plus-circle"></i> Post a Job
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register', role='employer') }}" class="btn btn-outline-custom px-4 py-3">
+                            <i class="bi bi-building"></i> Post a Job
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-lg p-4 rounded-4 bg-white position-relative">
+                    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                        <span class="fw-bold text-dark fs-5"><i class="bi bi-geo-alt-fill text-primary me-2"></i>Quick Local Search</span>
+                        <span class="badge bg-primary-subtle text-primary">Live Database</span>
+                    </div>
+                    
+                    <form action="{{ url_for('jobs.find_jobs') }}" method="GET">
+                        <div class="mb-3 search-input-group">
+                            <i class="bi bi-briefcase"></i>
+                            <input type="text" name="keyword" class="form-control" placeholder="Job title or skills (e.g. Painting)">
+                        </div>
+                        
+                        <div class="mb-3 search-input-group">
+                            <i class="bi bi-geo-alt"></i>
+                            <input type="text" name="location" class="form-control" placeholder="City or Town (e.g. Bantwal, Mangalore)">
+                        </div>
+                        
+                        <div class="mb-3 search-input-group">
+                            <i class="bi bi-grid"></i>
+                            <select name="category" class="form-select">
+                                <option value="">All Job Categories</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.name }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                            <i class="bi bi-search"></i> Search Available Jobs
+                        </button>
+                    </form>
+                    
+                    <div class="mt-3 pt-3 border-top text-center text-muted small">
+                        <i class="bi bi-shield-check text-success me-1"></i> Direct employer contact. No hidden middleman fees.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Job Categories -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Popular Job Categories</h2>
+            <p class="text-muted">Explore daily wage work by trade and vocational specialization</p>
+        </div>
+        
+        <div class="row g-3">
+            {% for cat in categories %}
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="{{ url_for('jobs.find_jobs', category=cat.name) }}" class="category-card text-decoration-none">
+                        <div class="category-icon-box">
+                            <i class="bi {{ cat.icon }}"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">{{ cat.name }}</h6>
+                        <span class="text-muted small">{{ cat.count }} Active {% if cat.count == 1 %}Job{% else %}Jobs{% endif %}</span>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Job Listings -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">Featured Job Opportunities</h2>
+                <p class="text-muted mb-0">Browse latest verified daily wage jobs posted by nearby employers</p>
+            </div>
+            <a href="{{ url_for('jobs.find_jobs') }}" class="btn btn-outline-custom">
+                View All Jobs <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        
+        <div class="row g-4">
+            {% if featured_jobs %}
+                {% for job in featured_jobs %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="job-card">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="job-category-badge">
+                                        <i class="bi bi-tag-fill"></i> {{ job.category }}
+                                    </span>
+                                    <span class="job-wage-tag">
+                                        ₹{{ "%.0f"|format(job.wage) }} <span class="text-muted fw-normal fs-6 ms-1">/ {{ job.wage_type }}</span>
+                                    </span>
+                                </div>
+                                
+                                <h5 class="fw-bold mb-2">
+                                    <a href="{{ url_for('jobs.job_details', job_id=job.id) }}" class="text-dark text-decoration-none">
+                                        {{ job.title }}
+                                    </a>
+                                </h5>
+                                
+                                <div class="text-muted small mb-3">
+                                    <span class="me-3"><i class="bi bi-building me-1 text-primary"></i>{{ job.employer_profile.company_name }}</span>
+                                    <span><i class="bi bi-geo-alt me-1 text-danger"></i>{{ job.location }}</span>
+                                </div>
+                                
+                                <p class="text-secondary small mb-3" style="min-height: 40px;">
+                                    {{ job.description[:110] }}{% if job.description|length > 110 %}...{% endif %}
+                                </p>
+                                
+                                <div class="mb-3">
+                                    <div class="text-muted small mb-1 fw-semibold">Required Skills:</div>
+                                    {% for skill in job.required_skills_list %}
+                                        <span class="skill-chip">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">
+                                    <i class="bi bi-clock me-1"></i>{{ job.duration }}
+                                </span>
+                                <a href="{{ url_for('jobs.job_details', job_id=job.id) }}" class="btn btn-primary-custom btn-sm">
+                                    View Details <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">No active jobs found right now</h5>
+                    <p class="text-muted">Be the first to post a job opportunity in your locality!</p>
+                    <a href="{{ url_for('jobs.post_job') }}" class="btn btn-primary-custom mt-2">Post a Job</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section Preview -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary-subtle text-primary px-3 py-2 fw-semibold mb-2">Transparent Workflow</span>
+            <h2 class="fw-bold">How The Portal Works</h2>
+            <p class="text-muted">A streamlined, 3-step process connecting workers and employers directly</p>
+        </div>
+        
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 border bg-light h-100">
+                    <div class="brand-icon-box mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem;">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h5 class="fw-bold">1. Register Profile</h5>
+                    <p class="text-muted small">
+                        Workers specify their vocational skills, wage expectations, and location. Employers set up company details and work locations.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 border bg-light h-100">
+                    <div class="brand-icon-box mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem; background: linear-gradient(135deg, #059669, #10b981);">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h5 class="fw-bold">2. Smart Matching</h5>
+                    <p class="text-muted small">
+                        Our rule-based engine scores jobs based on matching skills, location proximity, and wage alignment so you only see relevant work.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 border bg-light h-100">
+                    <div class="brand-icon-box mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.8rem; background: linear-gradient(135deg, #d97706, #f59e0b);">
+                        <i class="bi bi-telephone-outbound"></i>
+                    </div>
+                    <h5 class="fw-bold">3. Direct Connection</h5>
+                    <p class="text-muted small">
+                        Apply with one click. Employers review applications and contact suitable workers directly by phone with no intermediary.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('main.how_it_works') }}" class="btn btn-outline-custom">
+                Learn More About The Workflow <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+                <div class="pe-lg-4">
+                    <span class="badge bg-primary px-3 py-2 fw-semibold mb-2">Why Choose Us</span>
+                    <h2 class="fw-bold mb-3">Empowering Daily Wage Workers & Local Employers</h2>
+                    <p class="text-muted mb-4">
+                        Traditional labor markets force workers to wait uncertainly at road intersections every morning. Our digital portal bridges the physical gap safely, respectfully, and efficiently.
+                    </p>
+                    
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="text-primary fs-3"><i class="bi bi-check-circle-fill"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Zero Commission or Brokerage Cuts</h6>
+                            <p class="text-muted small mb-0">Every rupee earned goes 100% directly to the worker.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mb-3">
+                        <div class="text-primary fs-3"><i class="bi bi-check-circle-fill"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Skill & Location Proximity Matching</h6>
+                            <p class="text-muted small mb-0">Workers find work within their own neighborhood, cutting down commute time and travel expenses.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-3">
+                        <div class="text-primary fs-3"><i class="bi bi-check-circle-fill"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Direct Communication</h6>
+                            <p class="text-muted small mb-0">Verified contact telephone numbers enable prompt discussions regarding start times and site details.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                            <i class="bi bi-tools text-primary fs-1 mb-2"></i>
+                            <h5 class="fw-bold">For Workers</h5>
+                            <ul class="list-unstyled text-muted small mt-2 mb-0">
+                                <li class="mb-2"><i class="bi bi-check text-success me-1"></i> Fair daily wage transparency</li>
+                                <li class="mb-2"><i class="bi bi-check text-success me-1"></i> Jobs matching your exact skills</li>
+                                <li class="mb-2"><i class="bi bi-check text-success me-1"></i> Reliable nearby employers</li>
+                                <li><i class="bi bi-check text-success me-1"></i> No standing at labor chowks</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                            <i class="bi bi-building text-primary fs-1 mb-2"></i>
+                            <h5 class="fw-bold">For Employers</h5>
+                            <ul class="list-unstyled text-muted small mt-2 mb-0">
+                                <li class="mb-2"><i class="bi bi-check text-success me-1"></i> Fast worker hiring in minutes</li>
+                                <li class="mb-2"><i class="bi bi-check text-success me-1"></i> Verified profile credentials</li>
+                                <li class="mb-2"><i class="bi bi-check text-success me-1"></i> View applications in one dashboard</li>
+                                <li><i class="bi bi-check text-success me-1"></i> Transparent wage expectations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

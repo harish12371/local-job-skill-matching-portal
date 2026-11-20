@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works - Local Job & Skill Matching Portal{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white border-bottom py-5">
+    <div class="container text-center">
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 fw-semibold mb-2">Step-by-Step Guide</span>
+        <h1 class="fw-bold mb-3">How The Portal Works</h1>
+        <p class="text-muted lead mx-auto" style="max-width: 680px;">
+            A simple, secure, and transparent digital workflow connecting daily wage laborers and work providers directly.
+        </p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Worker Workflow -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 border-bottom pb-3 gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="brand-icon-box" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">For Workers / Employees</h3>
+                    <span class="text-muted small">Find nearby daily wage work matching your specific trade</span>
+                </div>
+            </div>
+            <a href="{{ url_for('auth.register', role='worker') }}" class="btn btn-primary-custom">
+                Register as Worker <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-primary fs-6 mb-3">Step 1</span>
+                    <h5 class="fw-bold">Create Profile</h5>
+                    <p class="text-muted small mb-0">
+                        Register with your name, phone number, town/location (e.g., Bantwal), list your trade skills (e.g. Painting, Masonry), and set your expected daily wage.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-primary fs-6 mb-3">Step 2</span>
+                    <h5 class="fw-bold">Discover Matching Jobs</h5>
+                    <p class="text-muted small mb-0">
+                        Visit your dashboard to view personalized recommended jobs. Our engine ranks opportunities where your skills and location align best.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-primary fs-6 mb-3">Step 3</span>
+                    <h5 class="fw-bold">Apply with One Click</h5>
+                    <p class="text-muted small mb-0">
+                        Click "Apply Now" and submit a brief note. The system protects against duplicate submissions and alerts the employer immediately.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-primary fs-6 mb-3">Step 4</span>
+                    <h5 class="fw-bold">Direct Call & Start Work</h5>
+                    <p class="text-muted small mb-0">
+                        Once accepted, the employer calls your mobile directly to confirm the job location, timing, and wage payment. No commissions!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employer Workflow -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 border-bottom pb-3 gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="brand-icon-box" style="width: 50px; height: 50px; font-size: 1.5rem; background: linear-gradient(135deg, #0f172a, #334155);">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">For Employers / Work Providers</h3>
+                    <span class="text-muted small">Hire reliable, skilled local workers in minutes</span>
+                </div>
+            </div>
+            <a href="{{ url_for('auth.register', role='employer') }}" class="btn btn-outline-custom">
+                Register as Employer <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-secondary fs-6 mb-3">Step 1</span>
+                    <h5 class="fw-bold">Register Company</h5>
+                    <p class="text-muted small mb-0">
+                        Sign up with your business or individual name, phone number, and primary site location (e.g., Mangalore or Bantwal).
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-secondary fs-6 mb-3">Step 2</span>
+                    <h5 class="fw-bold">Publish Job Opening</h5>
+                    <p class="text-muted small mb-0">
+                        Fill out the job form with title, category, daily wage offered, work duration, required skills, and number of workers needed.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-secondary fs-6 mb-3">Step 3</span>
+                    <h5 class="fw-bold">Review Applicant Profiles</h5>
+                    <p class="text-muted small mb-0">
+                        View real applicant profiles on your dashboard. Inspect their skills, experience years, and wage expectations side by side.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 rounded-4 bg-light h-100 border">
+                    <span class="badge bg-secondary fs-6 mb-3">Step 4</span>
+                    <h5 class="fw-bold">Accept & Connect Directly</h5>
+                    <p class="text-muted small mb-0">
+                        Mark applications as "Accepted" or "Rejected" with immediate status feedback. Call the worker directly to coordinate work.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
