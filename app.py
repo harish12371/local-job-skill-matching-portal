@@ -7,7 +7,13 @@ from models import db, login_manager
 csrf = CSRFProtect()
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    app = Flask(
+        __name__,
+        template_folder=os.path.join(base_dir, 'templates'),
+        static_folder=os.path.join(base_dir, 'static'),
+        static_url_path='/static'
+    )
     app.config.from_object(config_class)
 
     # Initialize extensions
@@ -57,14 +63,18 @@ def create_app(config_class=Config):
     def internal_server_error(e):
         return render_template('errors/500.html'), 500
 
-    # Ensure tables exist
+    # Ensure tables exist safely
     with app.app_context():
+        # Only create instance folder if using local SQLite database
+        if app.config.get('SQLALCHEMY_DATABASE_URI', '').startswith('sqlite'):
+            try:
+                os.makedirs(os.path.join(app.root_path, 'instance'), exist_ok=True)
+            except OSError:
+                pass  # Read-only filesystem in serverless
         try:
-            # Create instance folder if needed
-            os.makedirs(os.path.join(app.root_path, 'instance'), exist_ok=True)
             db.create_all()
         except Exception as err:
-            app.logger.error(f"Database table initialization error: {err}")
+            app.logger.warning(f"Database table initialization notice: {err}")
 
     return app
 

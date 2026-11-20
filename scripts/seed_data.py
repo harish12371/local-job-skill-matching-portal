@@ -15,6 +15,24 @@ from models.application import Application
 def seed_database():
     app = create_app()
     with app.app_context():
+        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+        is_production = app.config.get('IS_PRODUCTION', False)
+        is_remote_db = not db_uri.startswith('sqlite')
+
+        # Safety Guard: Prevent accidental data destruction on production / remote MySQL
+        if is_production or is_remote_db:
+            if '--allow-production-reset' not in sys.argv:
+                print("=" * 70)
+                print("SAFETY WARNING: ACCIDENTAL DATABASE RESET PREVENTED!")
+                print(f"Target Database: {db_uri.split('@')[-1] if '@' in db_uri else db_uri}")
+                print("seed_data.py drops and recreates all tables with development demo data.")
+                print("To safely initialize production tables WITHOUT dropping data, run:")
+                print("    python scripts/init_db.py")
+                print("To force reset this database anyway, pass:")
+                print("    python scripts/seed_data.py --allow-production-reset")
+                print("=" * 70)
+                return
+
         print("Cleaning up old demo data...")
         db.drop_all()
         db.create_all()
