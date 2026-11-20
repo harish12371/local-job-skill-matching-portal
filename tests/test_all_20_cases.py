@@ -5,7 +5,7 @@ from app import create_app
 from models import db, User, Job, Application, WorkerProfile, EmployerProfile
 from services.matching_service import calculate_job_match
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def app():
     app = create_app()
     app.config.update({
@@ -13,9 +13,25 @@ def app():
         "WTF_CSRF_ENABLED": False
     })
     with app.app_context():
+        # Clean up test accounts before module tests run
+        for email in ['aakash_worker@test.com', 'kishore_emp@test.com']:
+            u = User.query.filter_by(email=email).first()
+            if u:
+                db.session.delete(u)
+        for j in Job.query.filter(Job.title.like('%New Residential Painting%')).all():
+            db.session.delete(j)
+        db.session.commit()
         yield app
+        # Teardown after all module tests finish
+        for email in ['aakash_worker@test.com', 'kishore_emp@test.com']:
+            u = User.query.filter_by(email=email).first()
+            if u:
+                db.session.delete(u)
+        for j in Job.query.filter(Job.title.like('%New Residential Painting%')).all():
+            db.session.delete(j)
+        db.session.commit()
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def client(app):
     return app.test_client()
 
